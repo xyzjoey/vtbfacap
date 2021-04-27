@@ -1,12 +1,20 @@
-# VtbFace
-Facial mocap with webcam for easy use in unity/unreal.
-
-Face tracking based on https://github.com/kwea123/VTuber_Unity
+# vtuber-face-mocap
+Facial motion capture with webcam for VTuber in unity/unreal.
 
 ## TODO
-- [ ] Output blendshape parameters
-- [ ] Improve blendshape parameters
-- [ ] Calibration
-- [ ] UI to adjust blendshape
-- [ ] Unity plugin
-- [ ] Unreal plugin
+- [ ] obtain landmarks (mediapipe python)
+- [ ] stream out landmarks as custom data (2D blendshape)
+- [ ] stream out landmarks as custom data (3D blendshape)
+- [ ] calibration (head pose)
+- [ ] UI for blendshape adjustment
+- [ ] unity plugin (2D)
+- [ ] (optional) unity plugin (3D)
+- [ ] (optional) unreal plugin (2D)
+- [ ] unreal plugin (3D)
+- [ ] (optional) support video file as input
+- [ ] (optional) output data as file
+
+## Reference
+https://github.com/google/mediapipe
+
+https://github.com/Kazuhito00/iris-detection-using-py-mediapipe
