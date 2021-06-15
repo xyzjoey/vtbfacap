@@ -1,0 +1,5 @@
+mediapipe==0.8.4  # bug in 0.8.5
+numpy>=1.19.5
+opencv-python>=4.5.2.54
+pydantic>=1.8.2
+tensorflow>=2.5.0
