@@ -4,7 +4,7 @@ import cv2 as cv
 import numpy as np
 import tensorflow as tf
 
-from ..face_data import IrisLandmarks
+from ..math_utils import Vectors
 from ..settings import settings
 
 
@@ -59,7 +59,7 @@ class IrisTracking:
         iris[:,0] /= input_shape[1]
         iris[:,1] /= input_shape[2]
 
-        return IrisLandmarks(contour=eye_contour, iris=iris)
+        return eye_contour.view(Vectors), iris.view(Vectors)
 
     def get_input_shape(self):
         input_shape = self._input_details[0]['shape']

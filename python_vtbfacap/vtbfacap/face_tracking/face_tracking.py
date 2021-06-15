@@ -3,7 +3,8 @@ import mediapipe as mp
 import numpy as np
 
 from ..face_data import FaceAndIrisLandmarks
-from ..settings import settings
+from ..math_utils import Vectors
+from ..settings import settings, face_settings
 
 
 class FaceTracking:
@@ -27,12 +28,12 @@ class FaceTracking:
         if result.multi_face_landmarks is None:
             return None
 
-        normalized_landmarks = np.empty(shape=(settings.face_landmark_num, 3), dtype=float)
+        normalized_landmarks = Vectors.empty(shape=(face_settings.landmark_num, 3), dtype=float)
         width_multiplier = float(settings.width) / settings.normalize_factor
         height_multiplier = float(settings.height) / settings.normalize_factor
 
         for landmarks in result.multi_face_landmarks:
-            for i in range(settings.face_landmark_num):
+            for i in range(face_settings.landmark_num):
                 normalized_landmarks[i] = [
                     landmarks.landmark[i].x * width_multiplier,
                     landmarks.landmark[i].y * height_multiplier,

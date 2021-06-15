@@ -1,7 +1,8 @@
-import copy
+import cv2
 
 from .face_tracking import FaceTracking
 from .iris_tracking import IrisTracking
+from ..math_utils import Vectors, Transform2
 from ..settings import settings
 
 
@@ -11,14 +12,19 @@ class FaceAndIrisTracking:
         self.iris_tracking = IrisTracking()
 
     def _crop_frame(self, frame, box):
-        height, width, _ = frame.shape
+        width = (box[3] - box[0]).length()
+        height = (box[1] - box[0]).length()
 
-        x1 = int(max(box[0,0], 0))
-        y1 = int(max(box[0,1], 0))
-        x2 = int(min(box[1,0], width))
-        y2 = int(min(box[1,1], height))
+        src_box = box.astype("float32")
+        dst_box = Vectors.init([
+            [0, 0],
+            [0, height - 1],
+            [width - 1, height - 1],
+            [width - 1, 0]
+        ], dtype="float32")
 
-        return copy.deepcopy(frame[y1:y2,x1:x2])
+        M = cv2.getPerspectiveTransform(src_box, dst_box)
+        return cv2.warpPerspective(frame, M, (int(width), int(height)))
 
     def process(self, frame):
         face_landmarks = self.face_tracking.process(frame)
@@ -26,22 +32,39 @@ class FaceAndIrisTracking:
         if face_landmarks is None:
             return None
 
-        # FIXME remove rotation and flip right eye, skip eye if not completely visible
-        left_eye_landmarks = self.process_iris(frame, face_landmarks.get_left_eye_box() * settings.normalize_factor)
-        right_eye_landmarks = self.process_iris(frame, face_landmarks.get_right_eye_box() * settings.normalize_factor)
-        face_landmarks.set_left_eye_landmarks(left_eye_landmarks)
-        face_landmarks.set_right_eye_landmarks(right_eye_landmarks)
+        # get eye landmarks
+        angle = face_landmarks.angle_y()
+        if face_landmarks.is_left_eye_visible():
+            left_contour, left_iris = self.process_eye(frame, face_landmarks.get_left_eye_box(), angle, flip=False)
+            face_landmarks.set_left_eye_landmarks(iris=left_iris, contour=left_contour)
+        if face_landmarks.is_right_eye_visible():
+            right_contour, right_iris = self.process_eye(frame, face_landmarks.get_right_eye_box(), angle, flip=True)
+            face_landmarks.set_right_eye_landmarks(iris=right_iris, contour=right_contour)
 
         return face_landmarks
 
-    def process_iris(self, frame, eye_box):
-        eye_frame = self._crop_frame(frame, eye_box)
-        
-        # normalized for eye_frame
-        eye_landmarks = self.iris_tracking.process(eye_frame)
+    def process_eye(self, frame, eye_box, angle, flip):
+        eye_frame = self._crop_frame(frame, eye_box * settings.normalize_factor)  # always square
+        eye_frame_size = eye_frame.shape[0]
 
-        # normailzed for frame
-        eye_landmarks.contour[:,:2] = (eye_landmarks.contour[:,:2] * eye_frame.shape[0] + eye_box[0]) / settings.normalize_factor
-        eye_landmarks.iris[:,:2] = (eye_landmarks.iris[:,:2] * eye_frame.shape[0] + eye_box[0]) / settings.normalize_factor
+        if flip:
+            eye_frame = cv2.flip(eye_frame, 1)
 
-        return eye_landmarks
+        contour, iris = self.iris_tracking.process(eye_frame)
+
+        if flip:
+            M = Transform2.flip()
+            center = Vectors.init([0.5, 0.5, 0])
+            contour = contour.transform(M, origin=center)
+            iris = iris.transform(M, origin=center)
+
+        # normalize
+        contour = contour * eye_frame_size / settings.normalize_factor
+        iris = iris * eye_frame_size / settings.normalize_factor
+
+        # transform back to position of face
+        R = Transform2.rotation(angle)
+        contour = contour.transform(R) + eye_box[0].vectors3(z=0)
+        iris = iris.transform(R) + eye_box[0].vectors3(z=0)
+
+        return contour, iris
