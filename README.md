@@ -3,6 +3,13 @@ Facial motion capture with webcam for VTuber in unity/unreal.
 
 <img src="images\landmarks.gif" height="300">
 
+## Run
+```
+cd python_vtbfacap
+pip install -r requirements.txt
+HIDE_FACE=false python -m vtbfacap
+```
+
 ## TODO
 - [x] obtain landmarks (mediapipe python)
 - [ ] stream out landmarks as custom data (2D blendshape)
