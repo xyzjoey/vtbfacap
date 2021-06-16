@@ -1,8 +1,10 @@
 # vtuber-face-mocap
 Facial motion capture with webcam for VTuber in unity/unreal.
 
+<img src="images\landmarks.gif" height="300">
+
 ## TODO
-- [ ] obtain landmarks (mediapipe python)
+- [x] obtain landmarks (mediapipe python)
 - [ ] stream out landmarks as custom data (2D blendshape)
 - [ ] stream out landmarks as custom data (3D blendshape)
 - [ ] calibration (head pose)
