@@ -116,7 +116,7 @@ class FaceAndIrisLandmarks:  # normalized with respect to frame size
         if self._pitch is None:
             forward = self.forward()
             project = Vectors.init([forward[0], 0, forward[2]])
-            self._pitch = math.copysign(forward.angle(project), forward[1])
+            self._pitch = math.copysign(forward.angle(project), -forward[1])
         return self._pitch
 
     def yaw(self):

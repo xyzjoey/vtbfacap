@@ -1,0 +1,15 @@
+{
+    "name": "xyzjoey.vtbfacap",
+    "displayName": "VtbFacap",
+    "unity": "2021.1",
+    "unityRelease": "4f1",
+    "documentationUrl": "https://github.com/xyzjoey/vtbfacap",
+    "dependencies": {
+      "serializabledictionary": "https://github.com/RobertClassen/Unity-SerializableDictionary.git#UPM",
+      "jillejr.newtonsoft.json-for-unity": "https://github.com/jilleJr/Newtonsoft.Json-for-Unity.git#upm"
+   },
+    "author": {
+      "name": "xyzjoey"
+    }
+  }
+  
