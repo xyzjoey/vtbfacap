@@ -2,7 +2,7 @@ import cv2
 from .settings import settings
 
 
-class InputStream:
+class InputFrame:
     def __init__(self, video_path=None):
         self.is_camera = video_path is None
 

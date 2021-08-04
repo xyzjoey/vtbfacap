@@ -7,11 +7,16 @@ this_file_dir = os.path.dirname(os.path.realpath(__file__))
 
 
 class Settings(BaseSettings):
+    # input frame
     width: int = 640
     height: int = 480
     fps: int = 30
 
     iris_model_path: str = f"{this_file_dir}/../data/iris_landmark.tflite"  # copied from mediapipe
+
+    # UDP
+    host: str = "127.0.0.1"
+    port: int = 5066
 
     # debug
     hide_window: bool = False
@@ -20,8 +25,6 @@ class Settings(BaseSettings):
     @property
     def normalize_factor(self):
         return float(max(self.width, self.height))
-
-settings = Settings()
 
 
 class FaceSettings(BaseSettings):
@@ -74,4 +77,6 @@ class FaceSettings(BaseSettings):
     indices = LandmarkIndices()
     landmark_num: int = 468
 
+
+settings = Settings()
 face_settings = FaceSettings()

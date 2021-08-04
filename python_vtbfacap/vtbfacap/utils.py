@@ -47,12 +47,9 @@ class Debug:
 
         # direction
         center = face_and_iris_landmarks.face_landmarks.center() * factor
-        up = face_and_iris_landmarks.up()
-        right = face_and_iris_landmarks.right()
-        forward = face_and_iris_landmarks.forward()
-        Debug.draw_ray(frame, center, up * 100, color=(0, 255, 0))
-        Debug.draw_ray(frame, center, right * 100, color=(255, 0, 0))
-        Debug.draw_ray(frame, center, forward * 100, color=(0, 0, 255))
+        Debug.draw_ray(frame, center, face_and_iris_landmarks.up() * 100, color=(0, 255, 0))
+        Debug.draw_ray(frame, center, face_and_iris_landmarks.right() * 100, color=(255, 0, 0))
+        Debug.draw_ray(frame, center, face_and_iris_landmarks.forward() * 100, color=(0, 0, 255))
         # face
         Debug.draw_points(frame, face_and_iris_landmarks.face_landmarks * factor, color=(255,255,0))
         # eyes
@@ -62,8 +59,6 @@ class Debug:
         if face_and_iris_landmarks.right_iris_landmarks is not None:
             Debug.draw_points(frame, face_and_iris_landmarks.right_eye_contour * factor, color=(0,255,0))
             Debug.draw_points(frame, face_and_iris_landmarks.right_iris_landmarks * factor, color=(0,0,255))
-
-        print(f"roll: {face_and_iris_landmarks.roll()}")
 
     @staticmethod
     def _close():
