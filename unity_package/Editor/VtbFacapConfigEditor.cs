@@ -17,9 +17,9 @@ namespace VtbFacap{
                 script.LoadConfigFile();
             }
             
-            if(GUILayout.Button("Save Config File", GUILayout.Height(40)))
+            if(GUILayout.Button("Overwrite Config File", GUILayout.Height(40)))
             {
-                script.SaveConfigFile();
+                script.SaveConfigFile(AssetDatabase.GetAssetPath(script.configFile));
             }
         }
     }
