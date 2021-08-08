@@ -1,54 +1,58 @@
-// using GD.MinMaxSlider;
 using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-namespace VtbFacap{
+namespace VtbFacap
+{
+    using BlendshapeName = System.String;
+    using ParamName = System.String;
+
     [System.Serializable]
-    public class OutputParam
+    public class ParamValue
     {
-        // [MinMaxSlider(0f, 1f)]  // ident --> can't see values
-        // public Vector2 minMax = new Vector2(0f, 1f);
+        [ClampedCurveAttribute(0f, 0f, 1f, 1f, "map value from x axis to y axis")]
+        public AnimationCurve control = AnimationCurve.Linear(0f, 0f, 1f, 1f);
         [Range(0f, 1f)]
-        public float min;
-        [Range(0f, 1f)]
-        public float max;
+        public float smooth = 0.15f;
         [Range(-1f, 1f)]
-        public float mean = 0;
-        [Range(0f, 1f)]
-        public float smooth;
+        public float calibrate = 0f;
     }
 
     [System.Serializable]
-    public class ParamMapItem : SerializableDictionary<string, OutputParam> {}
+    public class ParamItem : SerializableDictionary<ParamName, ParamValue> {}
 
     [System.Serializable]
-    public class ParamMap : SerializableDictionary<string, ParamMapItem> {}
+    public class FaceMap : SerializableDictionary<BlendshapeName, ParamItem> {}
 
-    [CreateAssetMenu(fileName="NewVtbFacapConfig", menuName="VtbFacapConfig")]
-    public class VtbFacapConfig : ScriptableObject
+    [System.Serializable]
+    public class VtbFacapConfig
     {
-        public TextAsset configFile;
-        public ParamMap paramMap = new ParamMap();
-        
-        public void LoadConfigFile()
+        public FaceMap faceMap = new FaceMap();
+
+        public void LoadConfig(string data)
         {
-            var result = JsonConvert.DeserializeObject<dynamic>(this.configFile.ToString());
-            this.paramMap.Clear();
+            var result = JsonConvert.DeserializeObject<dynamic>(data);
+            this.faceMap.Clear();
             
-            foreach (var blendshapeConfig in result["paramMap"])
+            foreach (var blandshapeMap in result["faceMap"])
             {
-                this.paramMap[blendshapeConfig.Name] = new ParamMapItem();
-                foreach (var outputParamConfig in blendshapeConfig.Value)
+                this.faceMap[blandshapeMap.Name] = new ParamItem();
+                foreach (var paramItem in blandshapeMap.Value)
                 {
-                    OutputParam outputParam = new OutputParam();
-                    outputParam.min = outputParamConfig.Value["min"];
-                    outputParam.max = outputParamConfig.Value["max"];
-                    outputParam.mean = outputParamConfig.Value["mean"];
-                    outputParam.smooth = outputParamConfig.Value["smooth"];
-                    this.paramMap[blendshapeConfig.Name][outputParamConfig.Name] = outputParam;
+                    ParamValue paramValue = new ParamValue();
+                    
+                    // create curve
+                    paramValue.control = new AnimationCurve();
+                    foreach (var pt in paramItem.Value["controls"]) paramValue.control.AddKey((float)pt[0], (float)pt[1]);
+                    if (paramValue.control.length < 2) paramValue.control.AddKey(1f, 1f);
+                    Utils.SmoothCurve(paramValue.control);
+
+                    paramValue.smooth = paramItem.Value["smooth"];
+                    paramValue.calibrate = paramItem.Value["calibrate"];
+
+                    this.faceMap[blandshapeMap.Name][paramItem.Name] = paramValue;
                 }
             }
         }
@@ -57,17 +61,8 @@ namespace VtbFacap{
         {
             File.WriteAllText(
                 path,
-                JsonConvert.SerializeObject(new Dictionary<string, dynamic> {{"paramMap", this.paramMap}}, Formatting.Indented)
+                JsonConvert.SerializeObject(new Dictionary<string, dynamic> {{"faceMap", this.faceMap}}, Formatting.Indented)
             );
-        }
-
-        public IEnumerable IterParamMapWithIndex()
-        {
-            int i = 0;
-            foreach (var paramMapPair in this.paramMap)
-            {
-                yield return (Index: i++, Key: paramMapPair.Key, Value: paramMapPair.Value);
-            }
         }
     }
 }

@@ -7,7 +7,6 @@
   "unityRelease": "4f1",
   "documentationUrl": "https://github.com/xyzjoey/vtbfacap",
   "dependencies": {
-    "com.live2d.cubism-cubismloader": "4.0.301",
     "com.azixmcaze.unityserializabledictionary": "1.2.0",
     "jillejr.newtonsoft.json-for-unity": "13.0.102"
   },

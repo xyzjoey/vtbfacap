@@ -6,9 +6,10 @@ using System.Text;
 using System.Threading;
 using UnityEngine;
 
-namespace VtbFacap{
-    public class VtbFacapDataReceiver {
-    
+namespace VtbFacap
+{
+    public class VtbFacapDataReceiver
+    {
         Thread receiveThread;
         UdpClient client;
         public string ip = "127.0.0.1";
@@ -33,7 +34,6 @@ namespace VtbFacap{
                 {
                     byte[] data = client.Receive(ref ipEndpoint);
                     this.lastMsg = Encoding.ASCII.GetString(data);
-                    // Debug.Log(this.lastMsg);
                 }
                 catch (Exception err)
                 {
@@ -44,9 +44,7 @@ namespace VtbFacap{
 
         public string GetLastMsg()
         {
-            string lastMsg = this.lastMsg;
-            this.lastMsg = null;
-            return lastMsg;
+            return this.lastMsg;
         }
     }
 }
