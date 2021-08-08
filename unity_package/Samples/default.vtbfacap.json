@@ -1,27 +1,33 @@
 {
-  "paramMap": {
+  "faceMap": {
     "yaw": {
       "ParamAngleX": {
-        "min": 0.15,
-        "max": 0.85,
-        "mean": 0.0,
-        "smooth": 0.15
+        "controls": [
+          [0.15, 0],
+          [0.85, 1]
+        ],
+        "smooth": 0.15,
+        "calibrate": 0.0
       }
     },
     "pitch": {
       "ParamAngleY": {
-        "min": 0.15,
-        "max": 0.85,
-        "mean": 0.0,
-        "smooth": 0.15
+        "controls": [
+          [0.15, 0],
+          [0.85, 1]
+        ],
+        "smooth": 0.15,
+        "calibrate": 0.0
       }
     },
     "roll": {
       "ParamAngleZ": {
-        "min": 0.0,
-        "max": 1.0,
-        "mean": 0.0,
-        "smooth": 0.15
+        "controls": [
+          [0, 0],
+          [1, 1]
+        ],
+        "smooth": 0.15,
+        "calibrate": 0.0
       }
     }
   }
