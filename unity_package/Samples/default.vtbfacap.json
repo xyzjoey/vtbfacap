@@ -1,10 +1,11 @@
 {
+  "eyeSync": 1,
   "faceMap": {
     "yaw": {
       "ParamAngleX": {
-        "controls": [
-          [0.15, 0],
-          [0.85, 1]
+        "control": [
+          [0.15,0.0],
+          [0.85,1.0]
         ],
         "smooth": 0.15,
         "calibrate": 0.0
@@ -12,9 +13,9 @@
     },
     "pitch": {
       "ParamAngleY": {
-        "controls": [
-          [0.15, 0],
-          [0.85, 1]
+        "control": [
+          [0.15,0.0],
+          [0.85,1.0]
         ],
         "smooth": 0.15,
         "calibrate": 0.0
@@ -22,11 +23,73 @@
     },
     "roll": {
       "ParamAngleZ": {
-        "controls": [
-          [0, 0],
-          [1, 1]
+        "control": [
+          [0.0,0.0],
+          [1.0,1.0]
         ],
         "smooth": 0.15,
+        "calibrate": 0.0
+      }
+    },
+    "mouth_open": {
+      "ParamMouthOpenY": {
+        "control": [
+          [0.1,0.0],
+          [0.4,1.0]
+        ],
+        "smooth": 0.2,
+        "calibrate": 0.0
+      }
+    },
+    "mouth_form": {
+      "ParamMouthForm": {
+        "control": [
+          [0.15,0.0],
+          [0.9,1.0]
+        ],
+        "smooth": 0.0,
+        "calibrate": 0.0
+      }
+    },
+    "left_eye_open": {
+      "ParamEyeLOpen": {
+        "control": [
+          [0.42,0.0],
+          [0.481180638,0.507744849],
+          [0.6,1.0]
+        ],
+        "smooth": 0.0,
+        "calibrate": 0.0
+      }
+    },
+    "right_eye_open": {
+      "ParamEyeROpen": {
+        "control": [
+          [0.42,0.0],
+          [0.481180638,0.505395],
+          [0.6,1.0]
+        ],
+        "smooth": 0.0,
+        "calibrate": 0.0
+      }
+    },
+    "iris_x": {
+      "ParamEyeBallX": {
+        "control": [
+          [0.0,0.0],
+          [1.0,1.0]
+        ],
+        "smooth": 0.0,
+        "calibrate": 0.0
+      }
+    },
+    "iris_y": {
+      "ParamEyeBallY": {
+        "control": [
+          [0.0,0.0],
+          [1.0,1.0]
+        ],
+        "smooth": 0.0,
         "calibrate": 0.0
       }
     }

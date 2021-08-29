@@ -8,7 +8,7 @@ from ..math_utils import Vectors
 from ..settings import settings
 
 
-# for left eye with no rotation
+# for right eye with no rotation
 # TODO use mediapipe when iris supported
 class IrisTracking:
     def __init__(

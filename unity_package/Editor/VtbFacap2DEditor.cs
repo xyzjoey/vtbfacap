@@ -13,17 +13,26 @@ namespace VtbFacap
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
-            var script = (VtbFacap2D)target;
+
+            var script = (VtbFacap2D)this.target;
+
+            var previousGUIState = GUI.enabled;
+            if (Application.isPlaying) GUI.enabled = false;
 
             if(GUILayout.Button("Load Config File", GUILayout.Height(20)))
             {
+                Undo.RecordObject(script, "Change config");
                 script.config.LoadConfig(script.configFile.ToString());
+                EditorUtility.SetDirty(script);  // FIXME without this line cannot preserve change in play mode
+                PrefabUtility.RecordPrefabInstancePropertyModifications(script);
             }
             
             if(GUILayout.Button("Overwrite Config File", GUILayout.Height(20)))
             {
                 if (script.configFile == null)
-                    throw new Exception("The variable configFile of VtbFacap2D has not been assigned.");
+                {
+                    throw new Exception("[VtbFacap] configFile has not been assigned.");
+                }
 
                 script.config.SaveConfigFile(AssetDatabase.GetAssetPath(script.configFile));
             }
@@ -34,7 +43,7 @@ namespace VtbFacap
                 string targetDir = "Assets";
                 string prefabPath = AssetDatabase.GetAssetPath(PrefabUtility.GetCorrespondingObjectFromOriginalSource(script.gameObject));
 
-                if (!string.IsNullOrEmpty(prefabPath))
+                if (!string.IsNullOrEmpty(prefabPath) && !prefabPath.StartsWith("Packages"))
                 {
                     targetDir = Path.GetDirectoryName(prefabPath);
                 }
@@ -54,7 +63,10 @@ namespace VtbFacap
                 AssetDatabase.CopyAsset("Packages/xyzjoey.vtbfacap/Samples/default.vtbfacap.json", configFilePath);
                 script.configFile = AssetDatabase.LoadAssetAtPath<TextAsset>(configFilePath);
                 script.config.LoadConfig(script.configFile.ToString());
+                Debug.Log("[VtbFacap] Created config at " + configFilePath);
             }
+
+            if (Application.isPlaying) GUI.enabled = previousGUIState;
         }
     }
 }

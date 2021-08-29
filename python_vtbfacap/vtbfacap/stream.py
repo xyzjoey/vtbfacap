@@ -12,5 +12,5 @@ class OutputStream:
         self.socket.close()
 
     def send(self, data):
-        print(f"send({self.host}, {self.port}): {data}")
+        # print(f"send({self.host}, {self.port}): {data}")
         self.socket.sendto(data, (self.host, self.port))

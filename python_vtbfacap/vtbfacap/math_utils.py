@@ -1,7 +1,26 @@
 import numpy as np
 
 
+class Mathf:
+    @staticmethod
+    def map(value, old_min=0, old_max=1, new_min=0, new_max=1):
+        old_range = old_max - old_min
+        new_range = new_max - new_min
+        return (value - old_min) * (new_range / old_range) + new_min
+
+
 class Vectors(np.ndarray):  # (-1, 3) or (-1, 2) or (3,) or (2,)
+    class Columns:
+        def __getitem__(self, *args):
+            return np.c_.__getitem__(*args).view(Vectors)
+
+    class Rows:
+        def __getitem__(self, *args):
+            return np.r_.__getitem__(*args).view(Vectors)
+
+    c_ = Columns()
+    r_ = Rows()
+
     @classmethod
     def init(cls, *args, **kw):
         return np.array(*args, **kw).view(cls)
@@ -20,13 +39,13 @@ class Vectors(np.ndarray):  # (-1, 3) or (-1, 2) or (3,) or (2,)
 
     @classmethod
     def origin(cls):
-        return cls.init([0, 0, 0])
+        return np.zeros(3).view(cls)
 
     def append_columns(self, value):
         if self.is_1d():
-            return np.r_[self, [value]].view(Vectors)
+            return Vectors.r_[self, [value]]
         else:
-            return np.c_[self, np.ones(self.shape[0]) * value].view(Vectors)
+            return Vectors.c_[self, np.ones(self.shape[0]) * value]
 
     def is_1d(self):
         return self.ndim == 1
@@ -56,7 +75,7 @@ class Vectors(np.ndarray):  # (-1, 3) or (-1, 2) or (3,) or (2,)
     def vectors3(self, z=1):
         return self.append_columns(z)
 
-    def angle(self, v):  # assume 1d
+    def angle(self, v):  # assume 1d  # radian
         return np.arccos(self.dot(v) / (self.length() * v.length()))
 
     def cross(self, v):
@@ -67,6 +86,12 @@ class Vectors(np.ndarray):  # (-1, 3) or (-1, 2) or (3,) or (2,)
             return (M @ self.T).T
         else:
             return (M @ (self - origin).T).T + origin
+
+    def project(self, *vectors):
+        projected = Vectors.origin()
+        for v in vectors:
+            projected += self.dot(v) * v
+        return projected
 
 
 class Transform2:

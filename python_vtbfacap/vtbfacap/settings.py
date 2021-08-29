@@ -1,7 +1,8 @@
 import os
-from typing import List
+from typing import List, Tuple
 
 from pydantic import BaseSettings
+import numpy
 
 this_file_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -21,16 +22,52 @@ class Settings(BaseSettings):
     # debug
     hide_window: bool = False
     hide_face: bool = True
+    numpy_float_format: str = "{:.5f}"
 
     @property
     def normalize_factor(self):
         return float(max(self.width, self.height))
 
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        self.__post_init__()
+
+    def __post_init__(self):
+        numpy.set_printoptions(formatter={"float_kind": self.numpy_float_format.format})
+
 
 class FaceSettings(BaseSettings):
+    class BlendshapeAdjust(BaseSettings):
+        # map range to 0, 1
+        mouth_form_range: Tuple[float, float] = (0.3, 0.45)
+        left_eye_open_range: Tuple[float, float] = (0.7, 1.3)
+        right_eye_open_range: Tuple[float, float] = (0.7, 1.3)
+        # should stablize or not (default True)
+        stablize_mouth_open: bool = False
+
     # landmarks info https://github.com/tensorflow/tfjs-models/blob/master/facemesh/mesh_map.jpg
+    # left right from avatar's view
     class LandmarkIndices(BaseSettings):
-        left_eye_contour: List[int] = [
+        # mouth
+        upper_lip_center: int = 13
+        lower_lip_center: int = 14
+        mouth_corner_right: int = 61
+        mouth_corner_left: int = 291
+        upper_lip_outter_edge_samples: List[int] = [39, 0, 269]
+        upper_lip_inner_edge_samples: List[int] = [81, 13, 311]
+        lower_lip_outter_edge_samples: List[int] = [181, 17, 405]
+        lower_lip_inner_edge_samples: List[int] = [178, 14, 402]
+
+        # eye
+        left_eye_up: int = 386
+        left_eye_down: int = 374
+        left_eye_outer_corner: int = 466#263
+        left_eye_inner_corner: int = 362
+        right_eye_up: int = 159
+        right_eye_down: int = 145
+        right_eye_outer_corner: int = 33
+        right_eye_inner_corner: int = 133
+        right_eye_contour: List[int] = [
             33, 7, 163, 144, 145, 153, 154, 155, 133,
             246, 161, 160, 159, 158, 157, 173,
             130, 25, 110, 24, 23, 22, 26, 112, 243,
@@ -41,11 +78,11 @@ class FaceSettings(BaseSettings):
             143, 111, 117, 118, 119, 120, 121, 128, 245,
             156, 70, 63, 105, 66, 107, 55, 193
         ]
-        left_eye_contour_2nd_innermost: List[int] = [
+        right_eye_contour_2nd_innermost: List[int] = [
             130, 25, 110, 24, 23, 22, 26, 112, 243,
             247, 30, 29, 27, 28, 56, 190,
         ]
-        right_eye_contour: List[int] = [
+        left_eye_contour: List[int] = [
             263, 249, 390, 373, 374, 380, 381, 382, 362,
             466, 388, 387, 386, 385, 384, 398,
             359, 255, 339, 254, 253, 252, 256, 341, 463,
@@ -56,24 +93,28 @@ class FaceSettings(BaseSettings):
             372, 340, 346, 347, 348, 349, 350, 357, 465,
             383, 300, 293, 334, 296, 336, 285, 417
         ]
-        right_eye_contour_2nd_innermost: List[int] = [
+        left_eye_contour_2nd_innermost: List[int] = [
             359, 255, 339, 254, 253, 252, 256, 341, 463,
             467, 260, 259, 257, 258, 286, 414,
         ]
 
-        eyes_middle: int = 6
+        # nose bridge
+        eyes_middle1: int = 168
+        eyes_middle2: int = 6
         brows_middle1: int = 8
         brows_middle2: int = 9
 
         chin: int = 152
 
-        left_edge1: int = 127
-        left_edge2: int = 234
-        left_edge3: int = 93
-        right_edge1: int = 356
-        right_edge2: int = 454
-        right_edge3: int = 323
+        # edge near ear
+        right_edge1: int = 127
+        right_edge2: int = 234
+        right_edge3: int = 93
+        left_edge1: int = 356
+        left_edge2: int = 454
+        left_edge3: int = 323
 
+    blendshape_adjust = BlendshapeAdjust()
     indices = LandmarkIndices()
     landmark_num: int = 468
 

@@ -5,6 +5,7 @@ namespace VtbFacap
 {
     public class Utils
     {
+        // TODO inherit AnimationCurve
         public static void SmoothCurve(AnimationCurve curve)
         {
             if (curve.length == 0) return;
