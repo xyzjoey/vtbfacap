@@ -11,11 +11,16 @@ class Debug:
         cv2.imshow("vtbfacap_debug", frame)
 
     @staticmethod
-    def draw_points(frame, points, color=(255, 255, 255), put_indices=False):
+    def draw_point(frame, point, color=(255, 255, 255)):
+        x, y = int(point[0]), int(point[1])
+        cv2.circle(frame, (x, y), 2, color, -1)
+        return x, y
+
+    @classmethod
+    def draw_points(cls, frame, points, color=(255, 255, 255), draw_index=False):
         for i, row in enumerate(points):
-            x, y = int(row[0]), int(row[1])
-            cv2.circle(frame, (x, y), 2, color, -1)
-            if put_indices:
+            x, y = cls.draw_point(frame, row, color)
+            if draw_index:
                 cv2.putText(frame, str(i), (x + 2, y + 2), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1)
 
     @classmethod
@@ -46,7 +51,7 @@ class Debug:
         factor = settings.normalize_factor
 
         # direction
-        center = face_and_iris_landmarks.face_landmarks.center() * factor
+        center = face_and_iris_landmarks.origin() * factor
         Debug.draw_ray(frame, center, face_and_iris_landmarks.up() * 100, color=(0, 255, 0))
         Debug.draw_ray(frame, center, face_and_iris_landmarks.right() * 100, color=(255, 0, 0))
         Debug.draw_ray(frame, center, face_and_iris_landmarks.forward() * 100, color=(0, 0, 255))

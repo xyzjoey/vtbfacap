@@ -33,13 +33,13 @@ class FaceAndIrisTracking:
             return None
 
         # get eye landmarks
-        angle = face_landmarks.angle_y()
-        if face_landmarks.is_left_eye_visible():
-            left_contour, left_iris = self.process_eye(frame, face_landmarks.get_left_eye_box(), angle, flip=False)
-            face_landmarks.set_left_eye_landmarks(iris=left_iris, contour=left_contour)
+        angle = face_landmarks.up_angle()
         if face_landmarks.is_right_eye_visible():
-            right_contour, right_iris = self.process_eye(frame, face_landmarks.get_right_eye_box(), angle, flip=True)
+            right_contour, right_iris = self.process_eye(frame, face_landmarks.get_right_eye_box(), angle, flip=False)
             face_landmarks.set_right_eye_landmarks(iris=right_iris, contour=right_contour)
+        if face_landmarks.is_left_eye_visible():
+            left_contour, left_iris = self.process_eye(frame, face_landmarks.get_left_eye_box(), angle, flip=True)
+            face_landmarks.set_left_eye_landmarks(iris=left_iris, contour=left_contour)
 
         return face_landmarks
 

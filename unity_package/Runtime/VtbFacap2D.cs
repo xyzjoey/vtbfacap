@@ -11,17 +11,20 @@ namespace VtbFacap
     {
         public TextAsset configFile;
         public VtbFacapConfig config = new VtbFacapConfig();
+        public string ip = "127.0.0.1";
+        public int port = 5066;
 
-        VtbFacapDataReceiver dataReceiver = new VtbFacapDataReceiver();
-        CubismModel model;
-        CubismParameter paramBreath;
-        float t = 0f;
+        private VtbFacapDataReceiver dataReceiver;
+        private CubismModel model;
+        private CubismParameter paramBreath;
+        private float t = 0f;
 
         void Start()
         {
             this.model = this.FindCubismModel();
             this.paramBreath = this.model.Parameters.FindById("ParamBreath");
-            this.dataReceiver.init();
+            this.dataReceiver = new VtbFacapDataReceiver { ip = this.ip, port = this.port };
+            this.dataReceiver.StartListen();
         }
 
         void LateUpdate()
@@ -33,21 +36,40 @@ namespace VtbFacap
             // get tracking data
             string msg = this.dataReceiver.GetLastMsg();
             if (msg == null) return;
-            float[] shapeValues = Array.ConvertAll(msg.Split(' '), float.Parse);
+            float[] facapValues = Array.ConvertAll(msg.Split(' '), float.Parse);
+
+            // sync eye
+            int leftEyeOpenIndex = this.config.faceMap.IndexOf("left_eye_open");
+            int rightEyeOpenIndex = this.config.faceMap.IndexOf("right_eye_open");
+
+            if (facapValues[leftEyeOpenIndex] <= facapValues[rightEyeOpenIndex])
+            {
+                facapValues[rightEyeOpenIndex] = Mathf.LerpUnclamped(facapValues[rightEyeOpenIndex], facapValues[leftEyeOpenIndex], this.config.eyeSync);
+            }
+            else
+            {
+                facapValues[leftEyeOpenIndex] = Mathf.LerpUnclamped(facapValues[leftEyeOpenIndex], facapValues[rightEyeOpenIndex], this.config.eyeSync);
+            }
 
             // update model
             int i = 0;
 
             foreach (var blandshapeMap in this.config.faceMap)
             {
-                float value = shapeValues[i];
+                float value = facapValues[i];
                 foreach (var paramItem in blandshapeMap.Value)
                 {
                     var paramValue = paramItem.Value;  // Q: copy?
-                    CubismParameter modelParam = this.model.Parameters.FindById(paramItem.Key);
+                    paramValue.raw = value;
+                    CubismParameter modelParam = this.model.Parameters.FindById(paramItem.Key);  // TODO if not exist ...
+
+                    // calibrate
+                    value = value - paramValue.calibrate;
+
+                    paramValue.rawAfterCalibrate = value;
 
                     // scale by config
-                    value = paramValue.control.Evaluate(value - paramValue.calibrate);
+                    value = paramValue.control.Evaluate(value);
                     // scale by model min max
                     value = value * (modelParam.MaximumValue - modelParam.MinimumValue) + modelParam.MinimumValue;
                     // smooth
