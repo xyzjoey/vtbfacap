@@ -44,7 +44,7 @@ class FaceAndIrisTracking:
         return face_landmarks
 
     def process_eye(self, frame, eye_box, angle, flip):
-        eye_frame = self._crop_frame(frame, eye_box * settings.normalize_factor)  # always square
+        eye_frame = self._crop_frame(frame, eye_box * settings.normalize_multiplier)  # always square
         eye_frame_size = eye_frame.shape[0]
 
         if flip:
@@ -59,8 +59,8 @@ class FaceAndIrisTracking:
             iris = iris.transform(M, origin=center)
 
         # normalize
-        contour = contour * eye_frame_size / settings.normalize_factor
-        iris = iris * eye_frame_size / settings.normalize_factor
+        contour = contour * eye_frame_size / settings.normalize_multiplier
+        iris = iris * eye_frame_size / settings.normalize_multiplier
 
         # transform back to position of face
         R = Transform2.rotation(angle)

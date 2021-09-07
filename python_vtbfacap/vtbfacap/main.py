@@ -33,8 +33,8 @@ def main():
         # show
         if not settings.hide_window:
             if settings.hide_face:
-                Debug.fill_color(frame, (50, 50, 50))
-            Debug.draw_face(frame, face_and_iris_landmarks)
+                Debug.fill_color((50, 50, 50))
+            Debug.draw_face(face_and_iris_landmarks)
             Debug.show(frame)
 
         if InputKey.wait_esc():
