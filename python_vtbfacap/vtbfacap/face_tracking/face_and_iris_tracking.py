@@ -16,12 +16,12 @@ class FaceAndIrisTracking:
         height = (box[1] - box[0]).length()
 
         src_box = box.astype("float32")
-        dst_box = Vectors.init([
-            [0, 0],
-            [0, height - 1],
-            [width - 1, height - 1],
-            [width - 1, 0]
-        ], dtype="float32")
+        # fmt: off
+        dst_box = Vectors.init([[0, 0],
+                                [0, height - 1],
+                                [width - 1, height - 1],
+                                [width - 1, 0]], dtype="float32")
+        # fmt: on
 
         M = cv2.getPerspectiveTransform(src_box, dst_box)
         return cv2.warpPerspective(frame, M, (int(width), int(height)))
@@ -44,7 +44,7 @@ class FaceAndIrisTracking:
         return face_landmarks
 
     def process_eye(self, frame, eye_box, angle, flip):
-        eye_frame = self._crop_frame(frame, eye_box * settings.normalize_factor)  # always square
+        eye_frame = self._crop_frame(frame, eye_box * settings.normalize_multiplier)  # always square
         eye_frame_size = eye_frame.shape[0]
 
         if flip:
@@ -59,12 +59,12 @@ class FaceAndIrisTracking:
             iris = iris.transform(M, origin=center)
 
         # normalize
-        contour = contour * eye_frame_size / settings.normalize_factor
-        iris = iris * eye_frame_size / settings.normalize_factor
+        contour = contour * eye_frame_size / settings.normalize_multiplier
+        iris = iris * eye_frame_size / settings.normalize_multiplier
 
         # transform back to position of face
         R = Transform2.rotation(angle)
-        contour = contour.transform(R) + eye_box[0].vectors3(z=0)
-        iris = iris.transform(R) + eye_box[0].vectors3(z=0)
+        contour = contour.transform(R) + eye_box[0].pad_z(0)
+        iris = iris.transform(R) + eye_box[0].pad_z(0)
 
         return contour, iris

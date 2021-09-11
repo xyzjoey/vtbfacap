@@ -15,7 +15,7 @@ unity --> see unity_package/README.md
 
 ## TODO
 - [x] obtain landmarks (mediapipe python)
-- [ ] convert landmarks to blendshape data (2D) [head rotation done]
+- [ ] convert landmarks to blendshape data (2D)
 - [ ] convert landmarks to blendshape data (3D)
 - [ ] calibration
 - [ ] unity package (2D)

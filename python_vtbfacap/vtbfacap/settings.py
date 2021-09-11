@@ -8,34 +8,36 @@ this_file_dir = os.path.dirname(os.path.realpath(__file__))
 
 
 class Settings(BaseSettings):
-    # input frame
+    # input
     width: int = 640
     height: int = 480
     fps: int = 30
 
     iris_model_path: str = f"{this_file_dir}/../data/iris_landmark.tflite"  # copied from mediapipe
 
+    # computation
+    normalize_multiplier: float = None  # init in __post_init__
+
     # UDP
     host: str = "127.0.0.1"
     port: int = 5066
 
     # debug
+    debug_plot: bool = False
     hide_window: bool = False
     hide_face: bool = True
     numpy_float_format: str = "{:.5f}"
 
-    @property
-    def normalize_factor(self):
-        return float(max(self.width, self.height))
-
     def __init__(self, **kw):
         super().__init__(**kw)
+        self.normalize_multiplier = float(max(self.width, self.height))
         self.__post_init__()
 
     def __post_init__(self):
         numpy.set_printoptions(formatter={"float_kind": self.numpy_float_format.format})
 
 
+# fmt: off
 class FaceSettings(BaseSettings):
     class BlendshapeAdjust(BaseSettings):
         # map range to 0, 1
@@ -61,12 +63,12 @@ class FaceSettings(BaseSettings):
         # eye
         left_eye_up: int = 386
         left_eye_down: int = 374
-        left_eye_outer_corner: int = 466#263
-        left_eye_inner_corner: int = 362
+        left_eye_left_corner: int = 466
+        left_eye_right_corner: int = 362
         right_eye_up: int = 159
         right_eye_down: int = 145
-        right_eye_outer_corner: int = 33
-        right_eye_inner_corner: int = 133
+        right_eye_right_corner: int = 33
+        right_eye_left_corner: int = 133
         right_eye_contour: List[int] = [
             33, 7, 163, 144, 145, 153, 154, 155, 133,
             246, 161, 160, 159, 158, 157, 173,
@@ -117,7 +119,7 @@ class FaceSettings(BaseSettings):
     blendshape_adjust = BlendshapeAdjust()
     indices = LandmarkIndices()
     landmark_num: int = 468
-
+# fmt: on
 
 settings = Settings()
 face_settings = FaceSettings()

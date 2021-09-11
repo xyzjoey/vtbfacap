@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from ..math_utils import Vectors, Transform2
+from ..math_utils import Vectors, Transform2, Ray, Plane
 from ..settings import settings, face_settings
 
 
@@ -27,6 +27,14 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
         super().__init__(face_landmarks, left_iris, right_iris)
         self._reset_transform_info()
 
+    @property
+    def left_iris_center(self):
+        return self.left_iris_landmarks[0] if self.left_iris_landmarks is not None else None
+
+    @property
+    def right_iris_center(self):
+        return self.right_iris_landmarks[0] if self.right_iris_landmarks is not None else None
+
     def _reset_transform_info(self):
         self._rotation: Vectors = None
         self._origin: Vectors = None
@@ -38,14 +46,14 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
         self._roll: float = None
 
     def _get_bounding_square(self, landmarks, scale):
-        min_xy = np.amin(landmarks.vectors2(), axis=0)
-        max_xy = np.amax(landmarks.vectors2(), axis=0)
-        box = Vectors.init([
-            min_xy,
-            [min_xy[0], max_xy[1]],
-            max_xy,
-            [max_xy[0], min_xy[1]],
-        ])
+        min_xy = np.amin(landmarks.no_z(), axis=0)
+        max_xy = np.amax(landmarks.no_z(), axis=0)
+        # fmt: off
+        box = Vectors.init([min_xy,
+                            [min_xy[0], max_xy[1]],
+                            max_xy,
+                            [max_xy[0], min_xy[1]]])
+        # fmt: on
 
         center = (min_xy + max_xy) / 2
         xy_size = max_xy - min_xy
@@ -54,7 +62,7 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
         # scale & extend one side to square
         box -= center
         box *= (square_size / xy_size) * scale
-        box += center 
+        box += center
 
         return box
 
@@ -65,7 +73,7 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
         eye_contour_local = (eye_contour - center).transform(R.T)
 
         box = self._get_bounding_square(eye_contour_local, scale=1.8)
-        box = (box.vectors3().transform(R) + center).vectors2()
+        box = (box.pad_z(1).transform(R) + center).no_z()
 
         return box
 
@@ -76,18 +84,34 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
         return self._get_eye_box(self.right_eye_contour)
 
     def set_left_eye_landmarks(self, iris, contour):
-        self.left_iris_landmarks = iris
+        # projection to correct z depth
+        Z = Vectors.init([0, 0, 1])
+        eye_forward = (self.left_eye_up - self.left_eye_down).cross(self.left_eye_right_corner - self.left_eye_left_corner)
+        eye_center = (self.left_eye_up + self.left_eye_down) / 2
+        eye_plane = Plane(eye_center, eye_forward)
+        eye_ray_from_screen = Ray(iris, Z)
+        projected_iris, _ = Vectors.ray_plane_intersect(eye_ray_from_screen, eye_plane)
+
+        self.left_iris_landmarks = projected_iris
         # self.left_eye_contour = contour
         self._reset_transform_info()
 
     def set_right_eye_landmarks(self, iris, contour):
-        self.right_iris_landmarks = iris
+        # projection to correct z depth
+        Z = Vectors.init([0, 0, 1])
+        eye_forward = (self.right_eye_up - self.right_eye_down).cross(self.right_eye_right_corner - self.right_eye_left_corner)
+        eye_center = (self.right_eye_up + self.right_eye_down) / 2
+        eye_plane = Plane(eye_center, eye_forward)
+        eye_ray_from_screen = Ray(iris, Z)
+        projected_iris, _ = Vectors.ray_plane_intersect(eye_ray_from_screen, eye_plane)
+
+        self.right_iris_landmarks = projected_iris
         # self.right_eye_contour = contour
         self._reset_transform_info()
 
     def _is_all_visible(self, landmarks):
         """check if within screen"""
-        return np.all(landmarks[:,:2] >= 0) and np.all(landmarks[:,0] < settings.width) and np.all(landmarks[:,1] < settings.height)
+        return np.all(landmarks[:, :2] >= 0) and np.all(landmarks[:, 0] < settings.width) and np.all(landmarks[:, 1] < settings.height)
 
     def is_left_eye_visible(self):
         return self.yaw() < 0.7 and self._is_all_visible(self.left_eye_contour_2nd_innermost)
@@ -97,14 +121,14 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
 
     def origin(self):
         if self._origin is None:
-            self._origin = Vectors.init([
-                self.left_edge1,
-                self.left_edge2,
-                self.left_edge3,
-                self.right_edge1,
-                self.right_edge2,
-                self.right_edge3,
-            ]).center()
+            # fmt: off
+            self._origin = Vectors.init([self.left_edge1,
+                                         self.left_edge2,
+                                         self.left_edge3,
+                                         self.right_edge1,
+                                         self.right_edge2,
+                                         self.right_edge3]).center()
+            # fmt: on
         return self._origin
 
     # def rotation(self):
@@ -115,20 +139,24 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
 
     def up(self):
         if self._up is None:
+            # fmt: off
             self._up = Vectors.init([
                 self.left_edge1 - self.left_edge3,
                 self.right_edge1 - self.right_edge3,
-                self.brows_middle1 - self.eyes_middle2,
+                self.brows_middle1 - self.eyes_middle2
             ]).mean(axis=0).normalize()
+            # fmt: on
         return self._up
 
     def right(self):
         if self._right is None:
+            # fmt: off
             self._right = Vectors.init([
                 self.right_edge1 - self.left_edge1,
                 self.right_edge2 - self.left_edge2,
                 self.right_edge3 - self.left_edge3,
             ]).mean(axis=0).normalize()
+            # fmt: on
         return self._right
 
     def forward(self):  # FIXME affected by mouth open
@@ -164,20 +192,4 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
 
     def up_angle(self):
         """angle between self up vector and screen up vector"""
-        return math.copysign(self.up().vectors2().angle(Vectors.init([0, -1])), self.up()[0])
-
-    def valid_left_iris(self):
-        if self.left_iris_landmarks is None:
-            return None
-
-        iris = self.left_iris_landmarks[0]
-        withtin_eye_edge = (self.left_eye_up - iris).cross(self.left_eye_inner_corner - iris)[2] < 0  # y axis towards down
-        return iris if withtin_eye_edge else None
-
-    def valid_right_iris(self):
-        if self.right_iris_landmarks is None:
-            return None
-
-        iris = self.right_iris_landmarks[0]
-        withtin_eye_edge = (self.right_eye_up - iris).cross(self.right_eye_inner_corner - iris)[2] >= 0
-        return iris if withtin_eye_edge else None
+        return math.copysign(self.up().no_z().angle(Vectors.init([0, -1])), self.up()[0])
