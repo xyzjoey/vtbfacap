@@ -1,3 +1,5 @@
+from typing import NamedTuple
+
 import numpy as np
 
 
@@ -7,6 +9,16 @@ class Mathf:
         old_range = old_max - old_min
         new_range = new_max - new_min
         return (value - old_min) * (new_range / old_range) + new_min
+
+
+class Ray(NamedTuple):
+    p: "Vectors"  # start point
+    d: "Vectors"  # direction
+
+
+class Plane(NamedTuple):
+    p: "Vectors"  # any point on plane
+    n: "Vectors"  # normal
 
 
 class Vectors(np.ndarray):  # (-1, 3) or (-1, 2) or (3,) or (2,)
@@ -20,6 +32,18 @@ class Vectors(np.ndarray):  # (-1, 3) or (-1, 2) or (3,) or (2,)
 
     c_ = Columns()
     r_ = Rows()
+
+    @property
+    def x(self):
+        return self.reshape((-1, 3))[:, 0]
+
+    @property
+    def y(self):
+        return self.reshape((-1, 3))[:, 1]
+
+    @property
+    def z(self):
+        return self.reshape((-1, 3))[:, 2]
 
     @classmethod
     def init(cls, *args, **kw):
@@ -41,12 +65,6 @@ class Vectors(np.ndarray):  # (-1, 3) or (-1, 2) or (3,) or (2,)
     def origin(cls):
         return np.zeros(3).view(cls)
 
-    def append_columns(self, value):
-        if self.is_1d():
-            return Vectors.r_[self, [value]]
-        else:
-            return Vectors.c_[self, np.ones(self.shape[0]) * value]
-
     def is_1d(self):
         return self.ndim == 1
 
@@ -64,16 +82,14 @@ class Vectors(np.ndarray):  # (-1, 3) or (-1, 2) or (3,) or (2,)
         return self / lengths if lengths != 0 else self
 
     def center(self):
-        if self.is_1d():
-            return self
-        else:
-            return self.mean(axis=0)
+        return self.reshape((-1, 3)).mean(axis=0)
 
-    def vectors2(self):
+    def no_z(self):
         return self[:2] if self.is_1d() else self[:, :2]
 
-    def vectors3(self, z=1):
-        return self.append_columns(z)
+    def pad_z(self, z):
+        pad_right = [0, 1] if self.is_1d() else [(0, 0), (0, 1)]
+        return np.pad(self, pad_right, constant_values=z).view(Vectors)
 
     def angle(self, v):  # assume 1d  # radian
         return np.arccos(self.dot(v) / (self.length() * v.length()))
@@ -90,8 +106,15 @@ class Vectors(np.ndarray):  # (-1, 3) or (-1, 2) or (3,) or (2,)
     def project(self, *vectors):
         projected = Vectors.origin()
         for v in vectors:
-            projected += self.dot(v) * v
+            projected += (self.dot(v) / v.dot(v)) * v
         return projected
+
+    @staticmethod
+    def ray_plane_intersect(ray: Ray, plane: Plane):
+        """ray.p can be multiple points"""
+        t = (plane.p - ray.p).dot(plane.n) / ray.d.dot(plane.n)
+        intersect_point = ray.p + np.outer(t, ray.d).squeeze()
+        return intersect_point, t
 
 
 class Transform2:

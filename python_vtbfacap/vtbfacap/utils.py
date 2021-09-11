@@ -1,12 +1,18 @@
 import atexit
 
 import cv2
+import matplotlib.pyplot as matplot
 
 from .settings import settings
 
 
 class Debug:
     draw_tasks = []
+    paused = False
+
+    @staticmethod
+    def _close():
+        cv2.destroyAllWindows()
 
     @classmethod
     def show(cls, frame):
@@ -42,17 +48,11 @@ class Debug:
     
     @staticmethod
     def draw_ray(start, vector, color=(255, 255, 255)):
-        Debug.draw(cv2.line, start.vectors2().astype(int), (start + vector).vectors2().astype(int), color, 2)
+        Debug.draw(cv2.arrowedLine, start.no_z().astype(int), (start + vector).no_z().astype(int), color, 2)
 
     @staticmethod
     def draw_line(p1, p2, color=(255, 255, 255)):
-        Debug.draw(cv2.line, p1.vectors2().astype(int), p2.vectors2().astype(int), color, 2)
-
-    @staticmethod
-    def fill_color(color):
-        def draw_method(frame):
-            frame[:] = color
-        Debug.draw(draw_method)
+        Debug.draw(cv2.line, p1.no_z().astype(int), p2.no_z().astype(int), color, 2)
 
     @staticmethod
     def draw_face(face_and_iris_landmarks):
@@ -76,11 +76,46 @@ class Debug:
             Debug.draw_points(face_and_iris_landmarks.right_eye_contour * multiplier, color=(0,255,0))
             Debug.draw_points(face_and_iris_landmarks.right_iris_landmarks * multiplier, color=(0,0,255))
 
-    @staticmethod
-    def _close():
-        cv2.destroyAllWindows()
 
 atexit.register(Debug._close)
+
+
+class DebugPlot:
+    plot_tasks = []
+
+    @classmethod
+    def _convert_color(cls, color):
+        return tuple(v / 255 for v in color)
+
+    @classmethod
+    def add_plot_task(cls, get_method, *args, **kw):
+        if settings.debug_plot:
+            cls.plot_tasks.append((get_method, *args, kw))
+
+    @classmethod
+    def plot_points(cls, pts, color=(255, 255, 255)):
+        cls.add_plot_task(lambda axis: axis.scatter, pts.x, pts.y, pts.z, color=cls._convert_color(color))
+
+    @classmethod
+    def show(cls):
+        fig = matplot.figure()
+        axis = fig.add_subplot(111, projection='3d')
+        # axis.axis('equal')
+
+        for get_method, *args, kw in cls.plot_tasks:
+            plot_method = get_method(axis)
+            plot_method(*args, **kw)
+        cls.plot_tasks = []
+
+        fig.show()
+
+    @classmethod
+    def wait_input(cls):
+        matplot.pause(0.01)
+
+    @classmethod
+    def clear(cls):
+        cls.plot_tasks = []
 
 
 class FPS:
@@ -98,7 +133,16 @@ class FPS:
 
 
 class InputKey:
-    @staticmethod
-    def wait_esc():
-        key = cv2.waitKey(1)
-        return key == 27  # ESC
+    last_key = None
+
+    @classmethod
+    def wait_key(cls):
+        cls.last_key = cv2.waitKey(1)
+
+    @classmethod
+    def esc(cls):
+        return cls.last_key == 27  # ESC
+
+    @classmethod
+    def p(cls):
+        return cls.last_key == ord("p")

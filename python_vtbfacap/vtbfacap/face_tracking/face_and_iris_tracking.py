@@ -64,7 +64,7 @@ class FaceAndIrisTracking:
 
         # transform back to position of face
         R = Transform2.rotation(angle)
-        contour = contour.transform(R) + eye_box[0].vectors3(z=0)
-        iris = iris.transform(R) + eye_box[0].vectors3(z=0)
+        contour = contour.transform(R) + eye_box[0].pad_z(0)
+        iris = iris.transform(R) + eye_box[0].pad_z(0)
 
         return contour, iris

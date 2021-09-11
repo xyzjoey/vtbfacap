@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     port: int = 5066
 
     # debug
+    debug_plot: bool = False
     hide_window: bool = False
     hide_face: bool = True
     numpy_float_format: str = "{:.5f}"
@@ -61,12 +62,12 @@ class FaceSettings(BaseSettings):
         # eye
         left_eye_up: int = 386
         left_eye_down: int = 374
-        left_eye_outer_corner: int = 466#263
-        left_eye_inner_corner: int = 362
+        left_eye_left_corner: int = 466
+        left_eye_right_corner: int = 362
         right_eye_up: int = 159
         right_eye_down: int = 145
-        right_eye_outer_corner: int = 33
-        right_eye_inner_corner: int = 133
+        right_eye_right_corner: int = 33
+        right_eye_left_corner: int = 133
         right_eye_contour: List[int] = [
             33, 7, 163, 144, 145, 153, 154, 155, 133,
             246, 161, 160, 159, 158, 157, 173,

@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from ..math_utils import Vectors, Transform2
+from ..math_utils import Vectors, Transform2, Ray, Plane
 from ..settings import settings, face_settings
 
 
@@ -27,6 +27,14 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
         super().__init__(face_landmarks, left_iris, right_iris)
         self._reset_transform_info()
 
+    @property
+    def left_iris_center(self):
+        return self.left_iris_landmarks[0] if self.left_iris_landmarks is not None else None
+
+    @property
+    def right_iris_center(self):
+        return self.right_iris_landmarks[0] if self.right_iris_landmarks is not None else None
+
     def _reset_transform_info(self):
         self._rotation: Vectors = None
         self._origin: Vectors = None
@@ -38,8 +46,8 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
         self._roll: float = None
 
     def _get_bounding_square(self, landmarks, scale):
-        min_xy = np.amin(landmarks.vectors2(), axis=0)
-        max_xy = np.amax(landmarks.vectors2(), axis=0)
+        min_xy = np.amin(landmarks.no_z(), axis=0)
+        max_xy = np.amax(landmarks.no_z(), axis=0)
         box = Vectors.init([
             min_xy,
             [min_xy[0], max_xy[1]],
@@ -65,7 +73,7 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
         eye_contour_local = (eye_contour - center).transform(R.T)
 
         box = self._get_bounding_square(eye_contour_local, scale=1.8)
-        box = (box.vectors3().transform(R) + center).vectors2()
+        box = (box.pad_z(1).transform(R) + center).no_z()
 
         return box
 
@@ -76,12 +84,28 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
         return self._get_eye_box(self.right_eye_contour)
 
     def set_left_eye_landmarks(self, iris, contour):
-        self.left_iris_landmarks = iris
+        # projection to correct z depth
+        Z = Vectors.init([0, 0, 1])
+        eye_forward = (self.left_eye_up - self.left_eye_down).cross(self.left_eye_right_corner - self.left_eye_left_corner)
+        eye_center = (self.left_eye_up + self.left_eye_down) / 2
+        eye_plane = Plane(eye_center, eye_forward)
+        eye_ray_from_screen = Ray(iris, Z)
+        projected_iris, _ = Vectors.ray_plane_intersect(eye_ray_from_screen, eye_plane)
+
+        self.left_iris_landmarks = projected_iris
         # self.left_eye_contour = contour
         self._reset_transform_info()
 
     def set_right_eye_landmarks(self, iris, contour):
-        self.right_iris_landmarks = iris
+        # projection to correct z depth
+        Z = Vectors.init([0, 0, 1])
+        eye_forward = (self.right_eye_up - self.right_eye_down).cross(self.right_eye_right_corner - self.right_eye_left_corner)
+        eye_center = (self.right_eye_up + self.right_eye_down) / 2
+        eye_plane = Plane(eye_center, eye_forward)
+        eye_ray_from_screen = Ray(iris, Z)
+        projected_iris, _ = Vectors.ray_plane_intersect(eye_ray_from_screen, eye_plane)
+
+        self.right_iris_landmarks = projected_iris
         # self.right_eye_contour = contour
         self._reset_transform_info()
 
@@ -164,20 +188,4 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
 
     def up_angle(self):
         """angle between self up vector and screen up vector"""
-        return math.copysign(self.up().vectors2().angle(Vectors.init([0, -1])), self.up()[0])
-
-    def valid_left_iris(self):
-        if self.left_iris_landmarks is None:
-            return None
-
-        iris = self.left_iris_landmarks[0]
-        withtin_eye_edge = (self.left_eye_up - iris).cross(self.left_eye_inner_corner - iris)[2] < 0  # y axis towards down
-        return iris if withtin_eye_edge else None
-
-    def valid_right_iris(self):
-        if self.right_iris_landmarks is None:
-            return None
-
-        iris = self.right_iris_landmarks[0]
-        withtin_eye_edge = (self.right_eye_up - iris).cross(self.right_eye_inner_corner - iris)[2] >= 0
-        return iris if withtin_eye_edge else None
+        return math.copysign(self.up().no_z().angle(Vectors.init([0, -1])), self.up()[0])

@@ -6,10 +6,6 @@ from ..math_utils import Mathf
 from ..settings import face_settings
 
 
-class Blendshape:
-    pass
-
-
 @dataclass
 class Live2dShape:
     yaw: float = 0.5
@@ -56,7 +52,7 @@ class Live2dShape:
         self.mouth_form = mouth_width / face_width
         self.left_eye_open, self.right_eye_open = self.compute_eye_open(landmarks)
         # TODO fix iris
-        # self.iris_x, self.iris_y = self.compute_iris(landmarks)
+        self.iris_x, self.iris_y = self.compute_iris(landmarks)
 
     def compute_eye_open(self, landmarks):
         trust_left = self.yaw < 0.6
@@ -93,39 +89,40 @@ class Live2dShape:
     def compute_iris(self, landmarks):
         right = landmarks.right()
         up = landmarks.up()
-
-        left_iris = landmarks.valid_left_iris()
-        right_iris = landmarks.valid_right_iris()
+        left_iris = landmarks.left_iris_center
+        right_iris = landmarks.right_iris_center
 
         if left_iris is None and right_iris is None:
             return None, None
 
+        # TODO fix y (affected by eye close)
+
         # left x y
         if left_iris is not None:
-            xdist1 = (left_iris - landmarks.right_eye_inner_corner).project(right).length()
-            xdist2 = (left_iris - landmarks.left_eye_outer_corner).project(right).length()
-            left_iris_x = xdist1 / (xdist1 + xdist2)
-            ydist1 = (left_iris - landmarks.left_eye_down).project(up).length()
-            ydist2 = (left_iris - landmarks.left_eye_up).project(up).length()
-            left_iris_y = ydist1 / (ydist1 + ydist2)
+            X1 = (left_iris - landmarks.left_eye_right_corner).project(right)
+            X2 = (landmarks.left_eye_left_corner - landmarks.left_eye_right_corner).project(right)
+            Y1 = (left_iris - landmarks.left_eye_down).project(up)
+            Y2 = (landmarks.left_eye_up - landmarks.left_eye_down).project(up)
+            left_x = X1.length() / X2.length()
+            left_y = Y1.length() / Y2.length()
 
         # right x y
         if right_iris is not None:
-            xdist1 = (right_iris - landmarks.right_eye_outer_corner).project(right).length()
-            xdist2 = (right_iris - landmarks.right_eye_inner_corner).project(right).length()
-            right_iris_x = xdist1 / (xdist1 + xdist2)
-            ydist1 = (right_iris - landmarks.right_eye_down).project(up).length()
-            ydist2 = (right_iris - landmarks.right_eye_up).project(up).length()
-            right_iris_y = ydist1 / (ydist1 + ydist2)
+            X1 = (right_iris - landmarks.right_eye_right_corner).project(right)
+            X2 = (landmarks.right_eye_left_corner - landmarks.right_eye_right_corner).project(right)
+            Y1 = (right_iris - landmarks.right_eye_down).project(up)
+            Y2 = (landmarks.right_eye_up - landmarks.right_eye_down).project(up)
+            right_x = X1.length() / X2.length()
+            right_y = Y1.length() / Y2.length()
 
         # final x y
         if left_iris is not None and right_iris is not None:
-            iris_x = (left_iris_x + right_iris_x) / 2
-            iris_y = (left_iris_y + right_iris_y) / 2
+            iris_x = (left_x + right_x) / 2
+            iris_y = (left_y + right_y) / 2
         elif left_iris is not None:
-            iris_x, iris_y = left_iris_x, left_iris_y
+            iris_x, iris_y = left_x, left_y
         else:
-            iris_x, iris_y = right_iris_x, right_iris_y
+            iris_x, iris_y = right_x, right_y
 
         return iris_x, iris_y
 

@@ -9,7 +9,9 @@ from ..settings import settings
 
 
 # for right eye with no rotation
-# TODO use mediapipe when iris supported
+# TODO use cv to detect iris
+# https://medium.com/@stepanfilonov/tracking-your-eyes-with-python-3952e66194a6
+# https://github.com/antoinelame/GazeTracking
 class IrisTracking:
     def __init__(
         self,
