@@ -1,5 +1,27 @@
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = codestyle
+
+[testenv:codestyle]
+skip_install = true
+deps =
+    black >= 21.8b0
+    pyproject-flake8 >= 0.0.1a2
+commands =
+    black {posargs} .
+    pflake8
+"""
+
 [tool.pytest.ini_options]
 addopts = "-v"
 filterwarnings = [
     "ignore::DeprecationWarning",
 ]
+
+[tool.black]
+line-length = 160
+
+[tool.flake8]
+max-line-length = 160
+extend-ignore = "E203,"

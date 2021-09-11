@@ -1,5 +1,3 @@
-import cv2
-
 from .face_data import Live2dShape
 from .face_tracking import FaceAndIrisTracking
 from .stream import InputFrameStream, OutputStream

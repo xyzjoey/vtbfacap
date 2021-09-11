@@ -48,12 +48,12 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
     def _get_bounding_square(self, landmarks, scale):
         min_xy = np.amin(landmarks.no_z(), axis=0)
         max_xy = np.amax(landmarks.no_z(), axis=0)
-        box = Vectors.init([
-            min_xy,
-            [min_xy[0], max_xy[1]],
-            max_xy,
-            [max_xy[0], min_xy[1]],
-        ])
+        # fmt: off
+        box = Vectors.init([min_xy,
+                            [min_xy[0], max_xy[1]],
+                            max_xy,
+                            [max_xy[0], min_xy[1]]])
+        # fmt: on
 
         center = (min_xy + max_xy) / 2
         xy_size = max_xy - min_xy
@@ -62,7 +62,7 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
         # scale & extend one side to square
         box -= center
         box *= (square_size / xy_size) * scale
-        box += center 
+        box += center
 
         return box
 
@@ -111,7 +111,7 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
 
     def _is_all_visible(self, landmarks):
         """check if within screen"""
-        return np.all(landmarks[:,:2] >= 0) and np.all(landmarks[:,0] < settings.width) and np.all(landmarks[:,1] < settings.height)
+        return np.all(landmarks[:, :2] >= 0) and np.all(landmarks[:, 0] < settings.width) and np.all(landmarks[:, 1] < settings.height)
 
     def is_left_eye_visible(self):
         return self.yaw() < 0.7 and self._is_all_visible(self.left_eye_contour_2nd_innermost)
@@ -121,14 +121,14 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
 
     def origin(self):
         if self._origin is None:
-            self._origin = Vectors.init([
-                self.left_edge1,
-                self.left_edge2,
-                self.left_edge3,
-                self.right_edge1,
-                self.right_edge2,
-                self.right_edge3,
-            ]).center()
+            # fmt: off
+            self._origin = Vectors.init([self.left_edge1,
+                                         self.left_edge2,
+                                         self.left_edge3,
+                                         self.right_edge1,
+                                         self.right_edge2,
+                                         self.right_edge3]).center()
+            # fmt: on
         return self._origin
 
     # def rotation(self):
@@ -139,20 +139,24 @@ class FaceAndIrisLandmarks(FaceAndIrisLandmarksBase):  # normalized with respect
 
     def up(self):
         if self._up is None:
+            # fmt: off
             self._up = Vectors.init([
                 self.left_edge1 - self.left_edge3,
                 self.right_edge1 - self.right_edge3,
-                self.brows_middle1 - self.eyes_middle2,
+                self.brows_middle1 - self.eyes_middle2
             ]).mean(axis=0).normalize()
+            # fmt: on
         return self._up
 
     def right(self):
         if self._right is None:
+            # fmt: off
             self._right = Vectors.init([
                 self.right_edge1 - self.left_edge1,
                 self.right_edge2 - self.left_edge2,
                 self.right_edge3 - self.left_edge3,
             ]).mean(axis=0).normalize()
+            # fmt: on
         return self._right
 
     def forward(self):  # FIXME affected by mouth open

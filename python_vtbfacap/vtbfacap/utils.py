@@ -44,8 +44,8 @@ class Debug:
             Debug.draw(cv2.rectangle, box[0].astype(int), box[1].astype(int), color, 2)
         else:  # 4 points
             for i in range(4):
-                Debug.draw_line(box[i].astype(int), box[(i+1)%4].astype(int), color)
-    
+                Debug.draw_line(box[i].astype(int), box[(i + 1) % 4].astype(int), color)
+
     @staticmethod
     def draw_ray(start, vector, color=(255, 255, 255)):
         Debug.draw(cv2.arrowedLine, start.no_z().astype(int), (start + vector).no_z().astype(int), color, 2)
@@ -67,14 +67,14 @@ class Debug:
         Debug.draw_ray(center, face_and_iris_landmarks.right() * 100, color=(255, 0, 0))
         Debug.draw_ray(center, face_and_iris_landmarks.forward() * 100, color=(0, 0, 255))
         # face
-        Debug.draw_points(face_and_iris_landmarks.face_landmarks * multiplier, color=(255,255,0))
+        Debug.draw_points(face_and_iris_landmarks.face_landmarks * multiplier, color=(255, 255, 0))
         # eyes
         if face_and_iris_landmarks.left_iris_landmarks is not None:
-            Debug.draw_points(face_and_iris_landmarks.left_eye_contour * multiplier, color=(0,255,0))
-            Debug.draw_points(face_and_iris_landmarks.left_iris_landmarks * multiplier, color=(0,0,255))
+            Debug.draw_points(face_and_iris_landmarks.left_eye_contour * multiplier, color=(0, 255, 0))
+            Debug.draw_points(face_and_iris_landmarks.left_iris_landmarks * multiplier, color=(0, 0, 255))
         if face_and_iris_landmarks.right_iris_landmarks is not None:
-            Debug.draw_points(face_and_iris_landmarks.right_eye_contour * multiplier, color=(0,255,0))
-            Debug.draw_points(face_and_iris_landmarks.right_iris_landmarks * multiplier, color=(0,0,255))
+            Debug.draw_points(face_and_iris_landmarks.right_eye_contour * multiplier, color=(0, 255, 0))
+            Debug.draw_points(face_and_iris_landmarks.right_iris_landmarks * multiplier, color=(0, 0, 255))
 
 
 atexit.register(Debug._close)
@@ -99,7 +99,7 @@ class DebugPlot:
     @classmethod
     def show(cls):
         fig = matplot.figure()
-        axis = fig.add_subplot(111, projection='3d')
+        axis = fig.add_subplot(111, projection="3d")
         # axis.axis('equal')
 
         for get_method, *args, kw in cls.plot_tasks:

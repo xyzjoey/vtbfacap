@@ -69,13 +69,13 @@ class Vectors(np.ndarray):  # (-1, 3) or (-1, 2) or (3,) or (2,)
         return self.ndim == 1
 
     def length(self):
-        return np.sqrt((self**2).sum())
-    
+        return np.sqrt((self ** 2).sum())
+
     def lengths(self):
         if self.is_1d():
             return np.array(self.length())
         else:
-            return np.sqrt((self**2).sum(axis=1))
+            return np.sqrt((self ** 2).sum(axis=1))
 
     def normalize(self):
         lengths = self.lengths()
@@ -122,16 +122,16 @@ class Transform2:
     def rotation(theta):
         s = np.sin(theta)
         c = np.cos(theta)
-        return Vectors.init([
-            [c, -s, 0],
-            [s, c, 0],
-            [0, 0, 1],
-        ])
+        # fmt: off
+        return Vectors.init([[c, -s, 0],
+                             [s, c, 0],
+                             [0, 0, 1]])
+        # fmt: on
 
     @staticmethod
     def flip():
-        return Vectors.init([
-            [-1, 0, 0],
-            [0, 1, 0],
-            [0, 0, 1],
-        ])
+        # fmt: off
+        return Vectors.init([[-1, 0, 0],
+                             [0, 1, 0],
+                             [0, 0, 1]])
+        # fmt: on

@@ -37,6 +37,7 @@ class Settings(BaseSettings):
         numpy.set_printoptions(formatter={"float_kind": self.numpy_float_format.format})
 
 
+# fmt: off
 class FaceSettings(BaseSettings):
     class BlendshapeAdjust(BaseSettings):
         # map range to 0, 1
@@ -118,7 +119,7 @@ class FaceSettings(BaseSettings):
     blendshape_adjust = BlendshapeAdjust()
     indices = LandmarkIndices()
     landmark_num: int = 468
-
+# fmt: on
 
 settings = Settings()
 face_settings = FaceSettings()

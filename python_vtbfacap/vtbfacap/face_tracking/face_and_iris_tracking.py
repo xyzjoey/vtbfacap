@@ -16,12 +16,12 @@ class FaceAndIrisTracking:
         height = (box[1] - box[0]).length()
 
         src_box = box.astype("float32")
-        dst_box = Vectors.init([
-            [0, 0],
-            [0, height - 1],
-            [width - 1, height - 1],
-            [width - 1, 0]
-        ], dtype="float32")
+        # fmt: off
+        dst_box = Vectors.init([[0, 0],
+                                [0, height - 1],
+                                [width - 1, height - 1],
+                                [width - 1, 0]], dtype="float32")
+        # fmt: on
 
         M = cv2.getPerspectiveTransform(src_box, dst_box)
         return cv2.warpPerspective(frame, M, (int(width), int(height)))
