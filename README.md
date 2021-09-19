@@ -1,7 +1,8 @@
 # vtbfacap (vtuber facial mocap)
 Facial motion capture with webcam for VTuber in unity/unreal.
 
-<img src="images\live2d_mouth_eyeblink.gif" height="300">
+<img src="images\live2d_mouth.gif" height="200">
+<img src="images\live2d_eye.gif" height="200">
 
 ## Run
 python
