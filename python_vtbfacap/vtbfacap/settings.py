@@ -39,13 +39,15 @@ class Settings(BaseSettings):
 
 # fmt: off
 class FaceSettings(BaseSettings):
+    landmark_num: int = 468
+
     class BlendshapeAdjust(BaseSettings):
         # map range to 0, 1
         mouth_form_range: Tuple[float, float] = (0.3, 0.45)
-        left_eye_open_range: Tuple[float, float] = (0.7, 1.3)
-        right_eye_open_range: Tuple[float, float] = (0.7, 1.3)
+        left_eye_open_range: Tuple[float, float] = (0.5, 1.3)
+        right_eye_open_range: Tuple[float, float] = (0.5, 1.3)
         # should stablize or not (default True)
-        stablize_mouth_open: bool = False
+        # stablize_mouth_open: bool = False
 
     # landmarks info https://github.com/tensorflow/tfjs-models/blob/master/facemesh/mesh_map.jpg
     # left right from avatar's view
@@ -63,12 +65,14 @@ class FaceSettings(BaseSettings):
         # eye
         left_eye_up: int = 386
         left_eye_down: int = 374
-        left_eye_left_corner: int = 466
+        left_eye_left_corner: int = 263
         left_eye_right_corner: int = 362
+        left_eye_down_reference: int = 341
         right_eye_up: int = 159
         right_eye_down: int = 145
         right_eye_right_corner: int = 33
         right_eye_left_corner: int = 133
+        right_eye_down_reference: int = 112
         right_eye_contour: List[int] = [
             33, 7, 163, 144, 145, 153, 154, 155, 133,
             246, 161, 160, 159, 158, 157, 173,
@@ -82,8 +86,12 @@ class FaceSettings(BaseSettings):
         ]
         right_eye_contour_2nd_innermost: List[int] = [
             130, 25, 110, 24, 23, 22, 26, 112, 243,
-            247, 30, 29, 27, 28, 56, 190,
+            190, 56, 28, 27, 29, 30, 247
         ]
+        # right_eye_contour_innermost: List[int] = [
+        #     33, 7, 163, 144, 145, 153, 154, 155, 133,
+        #     173, 157, 158, 159, 160, 161, 246
+        # ]
         left_eye_contour: List[int] = [
             263, 249, 390, 373, 374, 380, 381, 382, 362,
             466, 388, 387, 386, 385, 384, 398,
@@ -97,14 +105,21 @@ class FaceSettings(BaseSettings):
         ]
         left_eye_contour_2nd_innermost: List[int] = [
             359, 255, 339, 254, 253, 252, 256, 341, 463,
-            467, 260, 259, 257, 258, 286, 414,
+            414, 286, 258, 257, 259, 260, 467
         ]
+        # left_eye_contour_innermost: List[int] = [
+        #     263, 249, 390, 373, 374, 380, 381, 382, 362,
+        #     398, 384, 385, 386, 387, 388, 466
+        # ]
 
-        # nose bridge
+        # nose
         eyes_middle1: int = 168
         eyes_middle2: int = 6
         brows_middle1: int = 8
         brows_middle2: int = 9
+        nose_right: int = 129
+        nose_left: int = 358
+        nose_tip: int = 5
 
         chin: int = 152
 
@@ -118,8 +133,8 @@ class FaceSettings(BaseSettings):
 
     blendshape_adjust = BlendshapeAdjust()
     indices = LandmarkIndices()
-    landmark_num: int = 468
 # fmt: on
+
 
 settings = Settings()
 face_settings = FaceSettings()

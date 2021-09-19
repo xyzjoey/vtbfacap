@@ -36,7 +36,8 @@ def main():
                 if settings.hide_face:
                     frame[:] = (50, 50, 50)  # fill gray
                 Debug.draw_face(face_and_iris_landmarks)
-                Debug.show(frame)
+                Debug.apply_draw(frame)
+                Debug.show()
 
         InputKey.wait_key()
 

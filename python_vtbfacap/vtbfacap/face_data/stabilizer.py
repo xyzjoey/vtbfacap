@@ -3,6 +3,8 @@ import numpy as np
 
 
 class Stabilizer:
+    # TODO smoother
+
     def __init__(
         self,
         # state_num=2,
