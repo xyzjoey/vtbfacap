@@ -49,17 +49,26 @@ class Vectors(np.ndarray):  # (-1, 3) or (-1, 2) or (3,) or (2,)
     def init(cls, *args, **kw):
         return np.array(*args, **kw).view(cls)
 
-    # @classmethod
-    # def zeros(cls, *args, **kw):
-    #     return np.zeros(*args, **kw).view(cls)
+    @classmethod
+    def zeros(cls, *args, **kw):
+        return np.zeros(*args, **kw).view(cls)
 
-    # @classmethod
-    # def ones(cls, *args, **kw):
-    #     return np.ones(*args, **kw).view(cls)
+    @classmethod
+    def ones(cls, *args, **kw):
+        return np.ones(*args, **kw).view(cls)
 
     @classmethod
     def empty(cls, *args, **kw):
         return np.empty(*args, **kw).view(cls)
+
+    def multiply(self, *args, **kw):
+        return np.multiply(self, *args, **kw).view(Vectors)
+
+    def divide(self, *args, **kw):
+        return np.divide(self, *args, **kw).view(Vectors)
+
+    def outer(self, *args, **kw):
+        return np.outer(self, *args, **kw).view(Vectors)
 
     @classmethod
     def origin(cls):
@@ -104,6 +113,7 @@ class Vectors(np.ndarray):  # (-1, 3) or (-1, 2) or (3,) or (2,)
             return (M @ (self - origin).T).T + origin
 
     def project(self, *vectors):
+        """assume self contains 1 vector"""
         projected = Vectors.origin()
         for v in vectors:
             projected += (self.dot(v) / v.dot(v)) * v

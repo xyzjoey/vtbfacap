@@ -41,15 +41,11 @@ namespace VtbFacap
             // sync eye
             int leftEyeOpenIndex = this.config.faceMap.IndexOf("left_eye_open");
             int rightEyeOpenIndex = this.config.faceMap.IndexOf("right_eye_open");
-
-            if (facapValues[leftEyeOpenIndex] <= facapValues[rightEyeOpenIndex])
-            {
-                facapValues[rightEyeOpenIndex] = Mathf.LerpUnclamped(facapValues[rightEyeOpenIndex], facapValues[leftEyeOpenIndex], this.config.eyeSync);
-            }
-            else
-            {
-                facapValues[leftEyeOpenIndex] = Mathf.LerpUnclamped(facapValues[leftEyeOpenIndex], facapValues[rightEyeOpenIndex], this.config.eyeSync);
-            }
+            (float minEyeOpen, float maxEyeOpen, int maxEyeOpenIndex) = (facapValues[leftEyeOpenIndex] <= facapValues[rightEyeOpenIndex] ?
+                                                                         (facapValues[leftEyeOpenIndex], facapValues[rightEyeOpenIndex], rightEyeOpenIndex) :
+                                                                         (facapValues[rightEyeOpenIndex], facapValues[leftEyeOpenIndex], leftEyeOpenIndex));
+            float eyeSync = this.config.eyeSync.Evaluate(maxEyeOpen - minEyeOpen);
+            facapValues[maxEyeOpenIndex] = Mathf.LerpUnclamped(maxEyeOpen, minEyeOpen, eyeSync);
 
             // update model
             int i = 0;

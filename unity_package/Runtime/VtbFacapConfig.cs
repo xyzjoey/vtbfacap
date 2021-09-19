@@ -40,8 +40,8 @@ namespace VtbFacap
     [System.Serializable]
     public class VtbFacapConfigData
     {
-        [Range(0f, 1f)]
-        public float eyeSync = 0f;
+        [ClampedCurveAttribute(0f, 0f, 1f, 1f, "map left right eye difference to sync value")]
+        public AnimationCurve eyeSync = AnimationCurve.Linear(0.299f, 1f, 0.3f, 0f);
         public FaceMap faceMap = new FaceMap();
 
         public string Serialize()

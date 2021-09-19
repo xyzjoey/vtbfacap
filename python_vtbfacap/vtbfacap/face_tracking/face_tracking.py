@@ -20,7 +20,7 @@ class FaceTracking:
             min_tracking_confidence=min_tracking_confidence,
         )
 
-    def process(self, frame):
+    def process(self, frame) -> FaceAndIrisLandmarks:
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         result = self.face_mesh.process(rgb_frame)
 
