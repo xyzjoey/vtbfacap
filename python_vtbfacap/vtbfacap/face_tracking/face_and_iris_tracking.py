@@ -76,18 +76,18 @@ class FaceAndIrisTracking:
         is_right_eye_visible = face_landmarks.yaw() > -0.7 and self._valid_points(frame.shape, face_landmarks.right_eye_contour_2nd_innermost)
 
         if is_left_eye_visible:
-            iris_landmarks = self.process_eye_v2(frame, face_landmarks, left=True)
+            iris_landmarks = self.process_eye(frame, face_landmarks, left=True)
             if iris_landmarks is not None:
                 face_landmarks.set_left_eye_landmarks(iris_landmarks)
 
         if is_right_eye_visible:
-            iris_landmarks = self.process_eye_v2(frame, face_landmarks, left=False)
+            iris_landmarks = self.process_eye(frame, face_landmarks, left=False)
             if iris_landmarks is not None:
                 face_landmarks.set_right_eye_landmarks(iris_landmarks)
 
         return face_landmarks
 
-    def process_eye_v2(self, frame, face_landmarks, left):
+    def process_eye(self, frame, face_landmarks, left):
         eye_contour = getattr(face_landmarks, "left_eye_contour_2nd_innermost" if left else "right_eye_contour_2nd_innermost")
 
         m = settings.normalize_multiplier
