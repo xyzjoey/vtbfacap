@@ -21,9 +21,9 @@ class Live2dShape:
     def __post_init__(self):
         """create stabilizers"""
         for field_name in self.__dataclass_fields__:
-            should_stablize = getattr(face_settings.blendshape_adjust, f"stablize_{field_name}", True)
-            if should_stablize:
-                setattr(self, f"_{field_name}_stabilizer", Stabilizer())
+            stabilize_param = getattr(face_settings.blendshape_adjust, f"stablize_{field_name}", [])
+            if stabilize_param is not None:
+                setattr(self, f"_{field_name}_stabilizer", Stabilizer(*stabilize_param))
 
     def __setattr__(self, name, value):
         """adjust value before assign (map range & stabilize)"""

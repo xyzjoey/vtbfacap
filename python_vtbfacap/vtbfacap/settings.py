@@ -44,10 +44,9 @@ class FaceSettings(BaseSettings):
     class BlendshapeAdjust(BaseSettings):
         # map range to 0, 1
         mouth_form_range: Tuple[float, float] = (0.3, 0.45)
-        left_eye_open_range: Tuple[float, float] = (0.5, 1.3)
-        right_eye_open_range: Tuple[float, float] = (0.5, 1.3)
-        # should stablize or not (default True)
-        # stablize_mouth_open: bool = False
+
+        # stablize param (default=(,))
+        # stablize_mouth_open: Optional[tuple] = None
 
     # landmarks info https://github.com/tensorflow/tfjs-models/blob/master/facemesh/mesh_map.jpg
     # left right from avatar's view
